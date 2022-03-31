@@ -4,20 +4,30 @@ namespace App\Http\Controllers;
 
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MahasiswaController extends Controller
 {
+    
+    public function search(Request $request)
+    {
+        $keyword = $request->search;
+        $mahasiswa = Mahasiswa::where('nama', 'like', "%".$keyword."%")
+        ->paginate(5);
+        return view('mahasiswa.index', compact('mahasiswa'))->with('i', (request()->input('page', 1) - 1) * 5);
+    }
+    
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         //fungsi eloquent menampilkan data menggunakan pagination
-        $mahasiswa = Mahasiswa::all(); // Mengambil semua isi tabel
-        $paginate = Mahasiswa::orderBy('id_mahasiswa', 'asc')->paginate(3);
-        return view('mahasiswa.index', ['mahasiswa' => $mahasiswa,'paginate'=>$paginate]);
+        //$mahasiswa = Mahasiswa::all(); // Mengambil semua isi tabel
+        $mahasiswa = Mahasiswa::orderBy('id_mahasiswa', 'asc')->simplePaginate(5);
+        return view('mahasiswa.index', compact('mahasiswa'));
     }
 
     /**
@@ -44,6 +54,10 @@ class MahasiswaController extends Controller
             'Nama' => 'required',
             'Kelas' => 'required',
             'Jurusan' => 'required',
+            'Jenis_Kelamin' => 'required',
+            'Email' => 'required',
+            'Alamat' => 'required',
+            'Tanggal_Lahir' => 'required',
         ]);
 
         //fungsi eloquent untuk menambah data
@@ -96,6 +110,10 @@ class MahasiswaController extends Controller
             'Nama' => 'required',
             'Kelas' => 'required',
             'Jurusan' => 'required',
+            'Jenis_Kelamin' => 'required',
+            'Email' => 'required',
+            'Alamat' => 'required',
+            'Tanggal_Lahir' => 'required',
         ]);
 
         //fungsi eloquent untuk mengupdate data inputan kita
@@ -105,6 +123,10 @@ class MahasiswaController extends Controller
             'nama'=>$request->Nama,
             'kelas'=>$request->Kelas,
             'jurusan'=>$request->Jurusan,
+            'jenis_kelamin'=>$request->Jenis_Kelamin,
+            'email'=>$request->Email,
+            'alamat'=>$request->Alamat,
+            'tanggal_lahir'=>$request->Tanggal_Lahir,
         ]);
 
         //jika data berhasil diupdate, akan kembali ke halaman utama
@@ -118,11 +140,12 @@ class MahasiswaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($nim)
     {
         ///fungsi eloquent untuk menghapus data
         Mahasiswa::where('nim', $nim)->delete();
         return redirect()->route('mahasiswa.index')
             -> with('success', 'Mahasiswa Berhasil Dihapus');
     }
+
 }
